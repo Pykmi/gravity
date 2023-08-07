@@ -62,47 +62,118 @@ class Game {
     }
   }
 
-  update() {
+  /* private movePlayer() {
     // Get the current velocities and positions
     let [ballVelocityX, ballVelocityY] = this.player.velocity();
     const [ballPositionX, ballPositionY] = this.player.position();
-
+  
     // Calculate the target velocities based on the current mouse position
     const [mousePositionX, mousePositionY] = this.player.mousePosition();
     const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
-
+  
     const targetVelocityX = mousePositionX - centerWidthPosition;
     const targetVelocityY = mousePositionY - centerHeightPosition;
-
+  
     // Gradually move the velocity towards the target
     ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
     ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
-
+  
     // Limit the speed to maxSpeed
     const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
-
+  
     if (speed > Player.maxSpeed) {
       ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
       ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
     }
-
+  
     // Update the velocities
     this.player.updateVelocityX(ballVelocityX);
     this.player.updateVelocityY(ballVelocityY);
-
+  
     // Calculate the new position based on the updated velocity
     const updatedBallPositionX = ballPositionX + ballVelocityX;
     const updatedBallPositionY = ballPositionY + ballVelocityY;
-
+  
     if (this.player.isMoving) {
       // Update the position
       this.player.updatePositionX(updatedBallPositionX);
       this.player.updatePositionY(updatedBallPositionY);
-
     }
-
-    this.detectCollision(updatedBallPositionX, updatedBallPositionY);
   
+    return [updatedBallPositionX, updatedBallPositionY];
+  } */
+
+  private calculateTargetVelocity() {
+    // Calculate the target velocities based on the current mouse position
+    const [mousePositionX, mousePositionY] = this.player.mousePosition();
+    const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
+  
+    const targetVelocityX = mousePositionX - centerWidthPosition;
+    const targetVelocityY = mousePositionY - centerHeightPosition;
+  
+    return [targetVelocityX, targetVelocityY];
+  }
+
+  private adjustVelocityTowardsTarget(targetVelocityX: number, targetVelocityY: number) {
+    // Get the current velocities
+    let [ballVelocityX, ballVelocityY] = this.player.velocity();
+  
+    // Gradually move the velocity towards the target
+    ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
+    ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
+  
+    // Limit the speed to maxSpeed
+    const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
+  
+    if (speed > Player.maxSpeed) {
+      ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
+      ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
+    }
+  
+    // Update the velocities
+    this.player.updateVelocityX(ballVelocityX);
+    this.player.updateVelocityY(ballVelocityY);
+  
+    return [ballVelocityX, ballVelocityY];
+  }
+
+  private updatePlayerPosition(velocityX: number, velocityY: number) {
+    // Get the current positions
+    const [ballPositionX, ballPositionY] = this.player.position();
+  
+    // Calculate the new position based on the updated velocity
+    const updatedBallPositionX = ballPositionX + velocityX;
+    const updatedBallPositionY = ballPositionY + velocityY;
+  
+    if (this.player.isMoving) {
+      // Update the position
+      this.player.updatePositionX(updatedBallPositionX);
+      this.player.updatePositionY(updatedBallPositionY);
+    }
+  
+    return [updatedBallPositionX, updatedBallPositionY];
+  }
+
+  movePlayer() {
+    const [targetVelocityX, targetVelocityY] = this.calculateTargetVelocity();
+
+    const [velocityX, velocityY] = this.adjustVelocityTowardsTarget(
+      targetVelocityX,
+      targetVelocityY
+    );
+
+    const [updatedBallPositionX, updatedBallPositionY] = this.updatePlayerPosition(
+      velocityX,
+      velocityY
+    );
+    
+    return [updatedBallPositionX, updatedBallPositionY];
+  }
+
+  update() {
+    const [updatedBallPositionX, updatedBallPositionY] = this.movePlayer();
+    this.detectCollision(updatedBallPositionX, updatedBallPositionY);
+    
     this.draw();
     requestAnimationFrame(() => this.update());
   }
