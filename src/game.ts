@@ -1,3 +1,4 @@
+import Color from "./color";
 import StationaryBall from "./orb";
 import Player from "./player";
 
@@ -36,7 +37,7 @@ class Game {
       const x = Math.random() * this.windowWidth;
       const y = Math.random() * this.windowHeight;
       const radius = 10;
-      const color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+      const color = new Color();
       return new StationaryBall(x, y, radius, color);
     });
   }
@@ -103,7 +104,6 @@ class Game {
     this.draw();
     requestAnimationFrame(() => this.update());
   }
-  
 
   draw() {
     const [ballPositionX, ballPositionY] = this.player.position();
@@ -118,7 +118,7 @@ class Game {
     }
 
     // Draw player at the center of the canvas  
-    this.ctx.fillStyle = this.player.color;
+    this.ctx.fillStyle = this.player.color.toString();
     this.ctx.beginPath();
     this.ctx.arc(this.windowWidth / 2, this.windowHeight / 2, this.player.radius, 0, Math.PI * 2);
     this.ctx.fill();

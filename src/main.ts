@@ -26,5 +26,5 @@ window.addEventListener("mousemove", ev => {
   game.player.updateMousePosition(x, y);
 });
 
-
+// START GAME
 game.start();
