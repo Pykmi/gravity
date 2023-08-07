@@ -12,7 +12,15 @@ class Game {
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
     this.player = new Player(this.windowHeight, this.windowWidth);
-    this.initStationaryBalls();
+    
+    this.stationaryBalls = Array.from({ length: 400 }).map(() => {
+      return new StationaryBall(
+        Math.random() * this.windowWidth,
+        Math.random() * this.windowHeight,
+        10,
+        new Color()
+      );
+    });
   }
 
   borders() {
@@ -32,15 +40,26 @@ class Game {
     return [this.windowWidth / 2, this.windowHeight / 2];
   }
 
-  initStationaryBalls() {
-    this.stationaryBalls = Array.from({ length: 400 }).map(() => {
-      return new StationaryBall(
-        Math.random() * this.windowWidth,
-        Math.random() * this.windowHeight,
-        10,
-        new Color()
-      );
-    });
+  private detectCollision(updatedBallPositionX: number, updatedBallPositionY: number) {
+    for (let i = 0; i < this.stationaryBalls.length; i++) {
+      const dx = updatedBallPositionX - this.stationaryBalls[i].x;
+      const dy = updatedBallPositionY - this.stationaryBalls[i].y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+  
+      // Collision detected
+      if (distance < this.player.radius + this.stationaryBalls[i].radius) {
+        this.player.increaseSize();
+  
+        // at size 60 the player begins to move away from the mouse
+        const sizeFactor = this.player.radius / 60;
+  
+        // adjust the reduction based on the ball's size
+        const reduction = 0.001 * sizeFactor; 
+        this.player.friction = Math.max(Player.minFraction, this.player.fraction - reduction);
+  
+        this.stationaryBalls.splice(i, 1);
+      }
+    }
   }
 
   update() {
@@ -82,25 +101,7 @@ class Game {
 
     }
 
-    for (let i = 0; i < this.stationaryBalls.length; i++) {
-      const dx = updatedBallPositionX - this.stationaryBalls[i].x;
-      const dy = updatedBallPositionY - this.stationaryBalls[i].y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-  
-      // Collision detected
-      if (distance < this.player.radius + this.stationaryBalls[i].radius) {
-        this.player.increaseSize();
-  
-        // at size 60 the player begins to move away from the mouse
-        const sizeFactor = this.player.radius / 60;
-  
-        // adjust the reduction based on the ball's size
-        const reduction = 0.001 * sizeFactor; 
-        this.player.fraction = Math.max(Player.minFraction, this.player.fraction - reduction);
-  
-        this.stationaryBalls.splice(i, 1);
-      }
-    }
+    this.detectCollision(updatedBallPositionX, updatedBallPositionY);
   
     this.draw();
     requestAnimationFrame(() => this.update());
