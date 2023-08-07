@@ -4,20 +4,34 @@ class Player {
   public friction = 0.98;
   public radius = 10;
 
-  public static readonly minVelocity = 1;
+  public static readonly minVelocity = 0.3;
   public static readonly minFraction = 0.05;
+  public static readonly velocityChangeFactor = 0.1; // Control the rate of change in velocity
+  public static readonly maxSpeed = 7;
 
+  private static readonly incr = 0.15;
+
+  private mousePositionX: number = 0;
+  private mousePositionY: number = 0;
   private velocityX = 0;
   private velocityY = 0;
+  private targetVelocityX = 0;
+  private targetVelocityY = 0;
 
   private positionX: number;
   private positionY: number;
+
+  public isMoving: boolean = false;
 
   constructor(gameWindowHeight: number, gameWindowWidth: number) {
     this.positionX = gameWindowWidth / 2;
     this.positionY = gameWindowHeight / 2;
 
     this.selectPlayerColor();
+  }
+
+  increaseSize(): void {
+    this.radius += Player.incr;
   }
 
   position(): number[] {
@@ -32,6 +46,19 @@ class Player {
     this.color = `rgb(${r},${g},${b})`;
   }
 
+  toggleMoving() {
+    this.isMoving = !this.isMoving;
+  }
+
+  updateMousePosition(xValue: number, yValue: number) {
+    this.mousePositionX = xValue;
+    this.mousePositionY = yValue;
+  }
+
+  mousePosition(): number[] {
+    return [this.mousePositionX, this.mousePositionY];
+  }
+
   updatePositionX(value: number): void {
     this.positionX = value;
   }
@@ -40,21 +67,36 @@ class Player {
     this.positionY = value;
   }
 
-  updateVelocityX(value: number): void {
-    if (Math.abs(value) < Player.minVelocity) {
-      this.velocityX = value < 0 ? -Player.minVelocity : Player.minVelocity;
-    } else {
-      this.velocityX = value;
+  updateVelocityX(newVelocityX: number) {
+    const speed = Math.sqrt(newVelocityX * newVelocityX + this.velocityY * this.velocityY);
+
+    if (speed > Player.maxSpeed) {
+      newVelocityX = (newVelocityX / speed) * Player.maxSpeed;
     }
+
+    this.velocityX = newVelocityX;
   }
 
-  updateVelocityY(value: number): void {
-    if (Math.abs(value) < Player.minVelocity) {
-      this.velocityY = value < 0 ? -Player.minVelocity : Player.minVelocity;
-    } else {
-      // console.log("VALUE: ", value)
-      this.velocityY = value;
+  updateVelocityY(newVelocityY: number) {
+    const speed = Math.sqrt(this.velocityX * this.velocityX + newVelocityY * newVelocityY);
+
+    if (speed > Player.maxSpeed) {
+      newVelocityY = (newVelocityY / speed) * Player.maxSpeed;
     }
+
+    this.velocityY = newVelocityY;
+  }
+
+  updateTargetVelocityX(newVelocityX: number) {
+    this.targetVelocityX = newVelocityX;
+  }
+  
+  updateTargetVelocityY(newVelocityY: number) {
+    this.targetVelocityY = newVelocityY;
+  }
+
+  targetVelocity(): number[] {
+    return [this.targetVelocityX, this.targetVelocityY];
   }
 
   velocity(): number[] {

@@ -11,11 +11,12 @@ class StationaryBall {
     this.color = color;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, xOffset: number, yOffset: number) {
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.arc(this.x + xOffset, this.y + yOffset, this.radius, 0, Math.PI * 2, false);
     ctx.fillStyle = this.color;
     ctx.fill();
+    ctx.closePath();
   }
 }
 

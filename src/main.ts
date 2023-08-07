@@ -5,16 +5,26 @@ const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
 const game = new Game(ctx);
 
-canvas.addEventListener("mousemove", function(ev) {
-  // Calculate difference between ball and mouse position
-  const [ballPositionX, ballPositionY] = game.player.position();
-
-  const diffX = ev.offsetX - ballPositionX;
-  const diffY = ev.offsetY - ballPositionY;
-
-  // Set the velocity in the direction of the mouse movement
-  game.player.updateVelocityX(diffX * game.player.fraction);
-  game.player.updateVelocityY(diffY * game.player.fraction);
+window.addEventListener("click", () => {
+  // toggle movement
+  if (game.player.isMoving) {
+    game.player.toggleMoving();
+  }
 });
+
+window.addEventListener("mousemove", ev => {
+  const rect = canvas.getBoundingClientRect();
+  const x = ev.clientX - rect.left;
+  const y = ev.clientY - rect.top;
+
+  // toggle movement
+  if (!game.player.isMoving) {
+    game.player.toggleMoving();
+  }
+
+  // Update the mouse position
+  game.player.updateMousePosition(x, y);
+});
+
 
 game.start();
