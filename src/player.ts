@@ -1,5 +1,7 @@
+import Color from "./color";
+
 class Player {
-  public color = "0";
+  public color: Color;
   public fraction = 0.05;
   public friction = 0.98;
   public radius = 10;
@@ -27,7 +29,7 @@ class Player {
     this.positionX = gameWindowWidth / 2;
     this.positionY = gameWindowHeight / 2;
 
-    this.selectPlayerColor();
+    this.color = new Color();
   }
 
   increaseSize(): void {
@@ -36,14 +38,6 @@ class Player {
 
   position(): number[] {
     return [this.positionX, this.positionY];
-  }
-
-  selectPlayerColor(): void {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-
-    this.color = `rgb(${r},${g},${b})`;
   }
 
   toggleMoving() {

@@ -1,3 +1,4 @@
+import Color from "./color";
 import StationaryBall from "./orb";
 import Player from "./player";
 
@@ -11,7 +12,15 @@ class Game {
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
     this.player = new Player(this.windowHeight, this.windowWidth);
-    this.initStationaryBalls();
+    
+    this.stationaryBalls = Array.from({ length: 400 }).map(() => {
+      return new StationaryBall(
+        Math.random() * this.windowWidth,
+        Math.random() * this.windowHeight,
+        10,
+        new Color()
+      );
+    });
   }
 
   borders() {
@@ -31,55 +40,7 @@ class Game {
     return [this.windowWidth / 2, this.windowHeight / 2];
   }
 
-  initStationaryBalls() {
-    this.stationaryBalls = Array.from({ length: 400 }).map(() => {
-      const x = Math.random() * this.windowWidth;
-      const y = Math.random() * this.windowHeight;
-      const radius = 10;
-      const color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-      return new StationaryBall(x, y, radius, color);
-    });
-  }
-
-  update() {
-    // Get the current velocities and positions
-    let [ballVelocityX, ballVelocityY] = this.player.velocity();
-    const [ballPositionX, ballPositionY] = this.player.position();
-
-    // Calculate the target velocities based on the current mouse position
-    const [mousePositionX, mousePositionY] = this.player.mousePosition();
-    const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
-
-    const targetVelocityX = mousePositionX - centerWidthPosition;
-    const targetVelocityY = mousePositionY - centerHeightPosition;
-
-    // Gradually move the velocity towards the target
-    ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
-    ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
-
-    // Limit the speed to maxSpeed
-    const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
-
-    if (speed > Player.maxSpeed) {
-      ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
-      ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
-    }
-
-    // Update the velocities
-    this.player.updateVelocityX(ballVelocityX);
-    this.player.updateVelocityY(ballVelocityY);
-
-    // Calculate the new position based on the updated velocity
-    const updatedBallPositionX = ballPositionX + ballVelocityX;
-    const updatedBallPositionY = ballPositionY + ballVelocityY;
-
-    if (this.player.isMoving) {
-      // Update the position
-      this.player.updatePositionX(updatedBallPositionX);
-      this.player.updatePositionY(updatedBallPositionY);
-
-    }
-
+  private detectCollision(updatedBallPositionX: number, updatedBallPositionY: number) {
     for (let i = 0; i < this.stationaryBalls.length; i++) {
       const dx = updatedBallPositionX - this.stationaryBalls[i].x;
       const dy = updatedBallPositionY - this.stationaryBalls[i].y;
@@ -94,16 +55,128 @@ class Game {
   
         // adjust the reduction based on the ball's size
         const reduction = 0.001 * sizeFactor; 
-        this.player.fraction = Math.max(Player.minFraction, this.player.fraction - reduction);
+        this.player.friction = Math.max(Player.minFraction, this.player.fraction - reduction);
   
         this.stationaryBalls.splice(i, 1);
       }
     }
+  }
+
+  /* private movePlayer() {
+    // Get the current velocities and positions
+    let [ballVelocityX, ballVelocityY] = this.player.velocity();
+    const [ballPositionX, ballPositionY] = this.player.position();
   
+    // Calculate the target velocities based on the current mouse position
+    const [mousePositionX, mousePositionY] = this.player.mousePosition();
+    const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
+  
+    const targetVelocityX = mousePositionX - centerWidthPosition;
+    const targetVelocityY = mousePositionY - centerHeightPosition;
+  
+    // Gradually move the velocity towards the target
+    ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
+    ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
+  
+    // Limit the speed to maxSpeed
+    const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
+  
+    if (speed > Player.maxSpeed) {
+      ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
+      ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
+    }
+  
+    // Update the velocities
+    this.player.updateVelocityX(ballVelocityX);
+    this.player.updateVelocityY(ballVelocityY);
+  
+    // Calculate the new position based on the updated velocity
+    const updatedBallPositionX = ballPositionX + ballVelocityX;
+    const updatedBallPositionY = ballPositionY + ballVelocityY;
+  
+    if (this.player.isMoving) {
+      // Update the position
+      this.player.updatePositionX(updatedBallPositionX);
+      this.player.updatePositionY(updatedBallPositionY);
+    }
+  
+    return [updatedBallPositionX, updatedBallPositionY];
+  } */
+
+  private calculateTargetVelocity() {
+    // Calculate the target velocities based on the current mouse position
+    const [mousePositionX, mousePositionY] = this.player.mousePosition();
+    const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
+  
+    const targetVelocityX = mousePositionX - centerWidthPosition;
+    const targetVelocityY = mousePositionY - centerHeightPosition;
+  
+    return [targetVelocityX, targetVelocityY];
+  }
+
+  private adjustVelocityTowardsTarget(targetVelocityX: number, targetVelocityY: number) {
+    // Get the current velocities
+    let [ballVelocityX, ballVelocityY] = this.player.velocity();
+  
+    // Gradually move the velocity towards the target
+    ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
+    ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
+  
+    // Limit the speed to maxSpeed
+    const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
+  
+    if (speed > Player.maxSpeed) {
+      ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
+      ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
+    }
+  
+    // Update the velocities
+    this.player.updateVelocityX(ballVelocityX);
+    this.player.updateVelocityY(ballVelocityY);
+  
+    return [ballVelocityX, ballVelocityY];
+  }
+
+  private updatePlayerPosition(velocityX: number, velocityY: number) {
+    // Get the current positions
+    const [ballPositionX, ballPositionY] = this.player.position();
+  
+    // Calculate the new position based on the updated velocity
+    const updatedBallPositionX = ballPositionX + velocityX;
+    const updatedBallPositionY = ballPositionY + velocityY;
+  
+    if (this.player.isMoving) {
+      // Update the position
+      this.player.updatePositionX(updatedBallPositionX);
+      this.player.updatePositionY(updatedBallPositionY);
+    }
+  
+    return [updatedBallPositionX, updatedBallPositionY];
+  }
+
+  movePlayer() {
+    const [targetVelocityX, targetVelocityY] = this.calculateTargetVelocity();
+
+    const [velocityX, velocityY] = this.adjustVelocityTowardsTarget(
+      targetVelocityX,
+      targetVelocityY
+    );
+
+    const [updatedBallPositionX, updatedBallPositionY] = this.updatePlayerPosition(
+      velocityX,
+      velocityY
+    );
+    
+    return [updatedBallPositionX, updatedBallPositionY];
+  }
+
+  update() {
+    const [updatedBallPositionX, updatedBallPositionY] = this.movePlayer();
+    this.detectCollision(updatedBallPositionX, updatedBallPositionY);
+    
     this.draw();
     requestAnimationFrame(() => this.update());
   }
-  
 
   draw() {
     const [ballPositionX, ballPositionY] = this.player.position();
@@ -118,7 +191,7 @@ class Game {
     }
 
     // Draw player at the center of the canvas  
-    this.ctx.fillStyle = this.player.color;
+    this.ctx.fillStyle = this.player.color.toString();
     this.ctx.beginPath();
     this.ctx.arc(this.windowWidth / 2, this.windowHeight / 2, this.player.radius, 0, Math.PI * 2);
     this.ctx.fill();
