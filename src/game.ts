@@ -34,11 +34,12 @@ class Game {
 
   initStationaryBalls() {
     this.stationaryBalls = Array.from({ length: 400 }).map(() => {
-      const x = Math.random() * this.windowWidth;
-      const y = Math.random() * this.windowHeight;
-      const radius = 10;
-      const color = new Color();
-      return new StationaryBall(x, y, radius, color);
+      return new StationaryBall(
+        Math.random() * this.windowWidth,
+        Math.random() * this.windowHeight,
+        10,
+        new Color()
+      );
     });
   }
 
