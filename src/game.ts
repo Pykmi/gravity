@@ -62,47 +62,6 @@ class Game {
     }
   }
 
-  /* private movePlayer() {
-    // Get the current velocities and positions
-    let [ballVelocityX, ballVelocityY] = this.player.velocity();
-    const [ballPositionX, ballPositionY] = this.player.position();
-  
-    // Calculate the target velocities based on the current mouse position
-    const [mousePositionX, mousePositionY] = this.player.mousePosition();
-    const [centerWidthPosition, centerHeightPosition] = this.centerPosition();
-  
-    const targetVelocityX = mousePositionX - centerWidthPosition;
-    const targetVelocityY = mousePositionY - centerHeightPosition;
-  
-    // Gradually move the velocity towards the target
-    ballVelocityX += (targetVelocityX - ballVelocityX) * Player.velocityChangeFactor;
-    ballVelocityY += (targetVelocityY - ballVelocityY) * Player.velocityChangeFactor;
-  
-    // Limit the speed to maxSpeed
-    const speed = Math.sqrt(ballVelocityX * ballVelocityX + ballVelocityY * ballVelocityY);
-  
-    if (speed > Player.maxSpeed) {
-      ballVelocityX = (ballVelocityX / speed) * Player.maxSpeed;
-      ballVelocityY = (ballVelocityY / speed) * Player.maxSpeed;
-    }
-  
-    // Update the velocities
-    this.player.updateVelocityX(ballVelocityX);
-    this.player.updateVelocityY(ballVelocityY);
-  
-    // Calculate the new position based on the updated velocity
-    const updatedBallPositionX = ballPositionX + ballVelocityX;
-    const updatedBallPositionY = ballPositionY + ballVelocityY;
-  
-    if (this.player.isMoving) {
-      // Update the position
-      this.player.updatePositionX(updatedBallPositionX);
-      this.player.updatePositionY(updatedBallPositionY);
-    }
-  
-    return [updatedBallPositionX, updatedBallPositionY];
-  } */
-
   private calculateTargetVelocity() {
     // Calculate the target velocities based on the current mouse position
     const [mousePositionX, mousePositionY] = this.player.mousePosition();
@@ -131,8 +90,7 @@ class Game {
     }
   
     // Update the velocities
-    this.player.updateVelocityX(ballVelocityX);
-    this.player.updateVelocityY(ballVelocityY);
+    this.player.updateVelocity(ballVelocityX, ballVelocityY);
   
     return [ballVelocityX, ballVelocityY];
   }
@@ -147,8 +105,7 @@ class Game {
   
     if (this.player.isMoving) {
       // Update the position
-      this.player.updatePositionX(updatedBallPositionX);
-      this.player.updatePositionY(updatedBallPositionY);
+      this.player.updatePosition(updatedBallPositionX, updatedBallPositionY);
     }
   
     return [updatedBallPositionX, updatedBallPositionY];
