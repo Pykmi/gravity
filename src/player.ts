@@ -32,8 +32,22 @@ class Player {
     this.color = new Color();
   }
 
+  private calculateSpeed(current: number, updated: number) {
+    const speed = Math.sqrt(updated * updated + current * current);
+
+    if (speed > Player.maxSpeed) {
+      return (updated / speed) * Player.maxSpeed;
+    }
+
+    return updated;
+  }
+
   increaseSize(): void {
     this.radius += Player.incr;
+  }
+
+  mousePosition(): number[] {
+    return [this.mousePositionX, this.mousePositionY];
   }
 
   position(): number[] {
@@ -49,44 +63,19 @@ class Player {
     this.mousePositionY = yValue;
   }
 
-  mousePosition(): number[] {
-    return [this.mousePositionX, this.mousePositionY];
+  updatePosition(xValue: number, yValue: number) {
+    this.positionX = xValue;
+    this.positionY = yValue;
   }
 
-  updatePositionX(value: number): void {
-    this.positionX = value;
+  updateTargetVelocity(xValue: number, yValue: number) {
+    this.targetVelocityX = xValue;
+    this.targetVelocityY = yValue;
   }
 
-  updatePositionY(value: number): void {
-    this.positionY = value;
-  }
-
-  updateVelocityX(newVelocityX: number) {
-    const speed = Math.sqrt(newVelocityX * newVelocityX + this.velocityY * this.velocityY);
-
-    if (speed > Player.maxSpeed) {
-      newVelocityX = (newVelocityX / speed) * Player.maxSpeed;
-    }
-
-    this.velocityX = newVelocityX;
-  }
-
-  updateVelocityY(newVelocityY: number) {
-    const speed = Math.sqrt(this.velocityX * this.velocityX + newVelocityY * newVelocityY);
-
-    if (speed > Player.maxSpeed) {
-      newVelocityY = (newVelocityY / speed) * Player.maxSpeed;
-    }
-
-    this.velocityY = newVelocityY;
-  }
-
-  updateTargetVelocityX(newVelocityX: number) {
-    this.targetVelocityX = newVelocityX;
-  }
-  
-  updateTargetVelocityY(newVelocityY: number) {
-    this.targetVelocityY = newVelocityY;
+  updateVelocity(xValue: number, yValue: number) {
+    this.velocityX = this.calculateSpeed(this.velocityX, xValue);
+    this.velocityY = this.calculateSpeed(this.velocityY, yValue);
   }
 
   targetVelocity(): number[] {

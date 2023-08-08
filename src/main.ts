@@ -24,6 +24,12 @@ window.addEventListener("mousemove", ev => {
 
   // Update the mouse position
   game.player.updateMousePosition(x, y);
+
+  // Update the target velocity
+  const [centerWidthPosition, centerHeightPosition] = game.centerPosition();
+  const targetVelocityX = x - centerWidthPosition;
+  const targetVelocityY = y - centerHeightPosition;
+  game.player.updateTargetVelocity(targetVelocityX, targetVelocityY);
 });
 
 // START GAME
