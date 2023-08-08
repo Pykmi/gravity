@@ -68,14 +68,14 @@ class Player {
     this.positionY = yValue;
   }
 
-  updateVelocity(xValue: number, yValue: number) {
-    this.velocityX = this.calculateSpeed(this.velocityX, xValue);
-    this.velocityY = this.calculateSpeed(this.velocityY, yValue);
-  }
-
   updateTargetVelocity(xValue: number, yValue: number) {
     this.targetVelocityX = xValue;
     this.targetVelocityY = yValue;
+  }
+
+  updateVelocity(xValue: number, yValue: number) {
+    this.velocityX = this.calculateSpeed(this.velocityX, xValue);
+    this.velocityY = this.calculateSpeed(this.velocityY, yValue);
   }
 
   targetVelocity(): number[] {
